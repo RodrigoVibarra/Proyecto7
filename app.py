@@ -60,3 +60,58 @@ if cond_sel:
     df_f = df_f[df_f['condition'].isin(cond_sel)]
 df_f = df_f[(df_f['model_year'].fillna(year_min) >= year_rng[0]) &
             (df_f['model_year'].fillna(year_max) <= year_rng[1])]
+
+# ==== KPIs ====
+st.markdown("### 📊 Resumen General")
+col1, col2, col3, col4 = st.columns(4)
+col1.metric("Publicaciones", f"{len(df_f):,}")
+col2.metric("Precio Mediano (USD)", f"${np.nanmedian(df_f['price']):,.0f}")
+col3.metric("Odómetro Mediano (mi)", f"{np.nanmedian(df_f['odometer']):,.0f}")
+col4.metric("Año Mediano",
+            f"{int(np.nanmedian(df_f['model_year'])) if not np.isnan(np.nanmedian(df_f['model_year'])) else 'NA'}")
+
+st.divider()
+
+# ==== 1️⃣ Histograma ====
+st.subheader("Distribución de precios")
+fig_hist = px.histogram(
+    df_f, x="price", nbins=50,
+    title="Distribución de precios de vehículos",
+    labels={"price": "Precio (USD)"},
+    color_discrete_sequence=["#636EFA"]
+)
+st.plotly_chart(fig_hist, use_container_width=True)
+
+# ==== 2️⃣ Dispersión ====
+st.subheader("Relación entre Precio y Odómetro")
+mostrar_tendencia = st.checkbox("Mostrar línea de tendencia")
+
+fig_scatter = px.scatter(
+    df_f, x="odometer", y="price",
+    color="type",
+    title="Precio vs. Odómetro por tipo de vehículo",
+    labels={"odometer": "Odómetro (millas)",
+            "price": "Precio (USD)", "type": "Tipo"},
+    hover_data=["model", "model_year", "condition"]
+)
+
+if mostrar_tendencia:
+    fig_scatter.add_traces(px.scatter(
+        df_f, x="odometer", y="price", trendline="ols").data[1])
+
+st.plotly_chart(fig_scatter, use_container_width=True)
+
+# ==== 3️⃣ Publicaciones por año ====
+st.subheader("Número de publicaciones por año")
+year_counts = df_f.dropna(subset=['posting_year']).groupby(
+    'posting_year').size().reset_index(name='Publicaciones')
+
+fig_years = px.bar(
+    year_counts, x="posting_year", y="Publicaciones",
+    title="Publicaciones por año",
+    labels={"posting_year": "Año de publicación"},
+    color_discrete_sequence=["#EF553B"]
+)
+st.plotly_chart(fig_years, use_container_width=True)
+
+st.info("Usa los filtros de la barra lateral y activa la casilla para ver la tendencia en el gráfico de dispersión.")
