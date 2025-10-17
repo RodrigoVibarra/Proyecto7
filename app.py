@@ -19,7 +19,7 @@ def load_data(csv_path: str) -> pd.DataFrame:
     return df
 
 
-# Ruta del archivo
+# Ruta/Path del archivo
 CSV_NAME = "vehicles_us.csv"
 csv_path = CSV_NAME if os.path.exists(CSV_NAME) else os.path.join(
     os.path.dirname(__file__), CSV_NAME)
@@ -34,7 +34,7 @@ df = load_data(csv_path)
 st.title("🚗 Análisis de Anuncios de Vehículos (US)")
 st.markdown("Explora los precios, kilometrajes, años y publicaciones por tipo de vehículo usando gráficos interactivos con **Plotly Express**.")
 
-# ==== SIDEBAR ====
+# ==== BARRA LATERAL ====
 st.sidebar.header("Filtros")
 fuel_sel = st.sidebar.multiselect(
     "Combustible", sorted(df['fuel'].dropna().unique().tolist()))
@@ -65,9 +65,9 @@ df_f = df_f[(df_f['model_year'].fillna(year_min) >= year_rng[0]) &
 st.markdown("### 📊 Resumen General")
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Publicaciones", f"{len(df_f):,}")
-col2.metric("Precio Mediano (USD)", f"${np.nanmedian(df_f['price']):,.0f}")
-col3.metric("Odómetro Mediano (mi)", f"{np.nanmedian(df_f['odometer']):,.0f}")
-col4.metric("Año Mediano",
+col2.metric("Precio Promedio (USD)", f"${np.nanmedian(df_f['price']):,.0f}")
+col3.metric("Odómetro Promedio (mi)", f"{np.nanmedian(df_f['odometer']):,.0f}")
+col4.metric("Año Promedio",
             f"{int(np.nanmedian(df_f['model_year'])) if not np.isnan(np.nanmedian(df_f['model_year'])) else 'NA'}")
 
 st.divider()
